@@ -1,6 +1,7 @@
 const express = require('express');
 const port = process.env.PORT || 8080;
 const db = require("./models/index");
+const cors = require("cors");
 
 //Sync database
 db.sequelize.sync();
@@ -12,23 +13,23 @@ const Passport = require('./routes/authentication').passport;
 const app = express();
 
 app.use(require('morgan')('combined')); //HTTP request logger
+
+var corsOptions = {
+  origin: true,
+  methods: "GET,OPTIONS,PUT,PATCH,POST,DELETE,HEAD",
+  allowedHeaders: ['Content-Type'],
+  credentials : true
+ }
+app.use(cors(corsOptions))
+
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+
 app.use(require('express-session')({
   secret: 'banana peixinho',
   resave: true,
   saveUninitialized: true 
 }));
-
-app.use(function(req, res, next) {
-  const origin = req.headers.origin;
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header("Access-Control-Allow-Credentials", true);
-  next();
-});
-
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
 
 app.use(Passport.initialize());
 app.use(Passport.session());
